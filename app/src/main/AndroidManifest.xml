@@ -2,49 +2,61 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="com.inodaf.cowpaw">
 
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" />
+  <uses-permission android:name="android.permission.RECEIVE_SMS" />
+  <uses-permission android:name="android.permission.READ_SMS" />
 
-    <application
-      android:allowBackup="true"
-      android:icon="@mipmap/ic_launcher"
-      android:label="@string/app_name"
-      android:roundIcon="@mipmap/ic_launcher_round"
-      android:supportsRtl="true"
-      android:theme="@style/AppTheme">
-        <activity android:name=".OnboardingActivity" android:noHistory="true" />
+  <application
+    android:allowBackup="true"
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name"
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:supportsRtl="true"
+    android:theme="@style/AppTheme">
+    <receiver android:name=".CurrentInvoice">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
 
-        <service
-          android:name=".usecases.ExpenseWatcher"
-          android:enabled="true"
-          android:exported="false" />
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/current_invoice_info" />
+    </receiver>
 
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+    <activity
+      android:name=".OnboardingActivity"
+      android:noHistory="true" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+    <service
+      android:name=".usecases.ExpenseWatcher"
+      android:enabled="true"
+      android:exported="false" />
 
-        <service
-          android:name=".services.SMSHandler"
-          android:enabled="true"
-          android:exported="false" />
-        <service
-          android:name=".services.SMSWatcher"
-          android:enabled="true"
-          android:exported="false"
-          android:permission="android.permission.BIND_JOB_SERVICE" />
+    <activity android:name=".MainActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
 
-        <receiver
-          android:name=".receivers.SMSReceiver"
-          android:enabled="true"
-          android:permission="android.permission.BROADCAST_SMS">
-            <intent-filter android:priority="1000">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
-    </application>
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+
+    <service
+      android:name=".services.SMSHandler"
+      android:enabled="true"
+      android:exported="false" />
+    <service
+      android:name=".services.SMSWatcher"
+      android:enabled="true"
+      android:exported="false"
+      android:permission="android.permission.BIND_JOB_SERVICE" />
+
+    <receiver
+      android:name=".services.SMSReceiver"
+      android:enabled="true"
+      android:permission="android.permission.BROADCAST_SMS">
+      <intent-filter android:priority="1000">
+        <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+      </intent-filter>
+    </receiver>
+  </application>
 
 </manifest>

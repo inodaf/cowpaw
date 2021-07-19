@@ -1,22 +1,24 @@
 <resources>
-    <!-- General -->
-    <string name="app_name">Cow Paw</string>
-    <string name="current_invoice">Fatura Atual</string>
+  <!-- General -->
+  <string name="app_name">Cow Paw</string>
+  <string name="current_invoice">Fatura Atual</string>
 
-    <!-- UI:Onboarding -->
-    <string name="onboarding1_title"><b><i>Zero</i> surpresas</b></string>
-    <string name="onboarding1_subtitle">Acompanhe o <b>valor da sua fatura</b>\nsem precisar abrir o App do seu banco.</string>
-    <string name="onboarding1_button_label">Começar</string>
+  <!-- UI:Onboarding -->
+  <string name="onboarding1_title"><b><i>Zero</i> surpresas</b></string>
+  <string name="onboarding1_subtitle">Acompanhe o <b>valor da sua fatura</b>\nsem precisar abrir o App do seu banco.</string>
+  <string name="onboarding1_button_label">Começar</string>
 
-    <!--  UI:Main -->
-    <string name="main_refresh_button_label">Atualizar</string>
+  <!--  UI:Main -->
+  <string name="main_refresh_button_label">Atualizar</string>
 
-    <!-- Keys/Values -->
-    <string name="key_amount_file">com.inodaf.cowpaw.AMOUNT_FILE</string>
-    <string name="key_amount_value">amount_value</string>
-    <string name="key_onboarding_completed_file">com.inodaf.cowpaw.ONBOARDING_COMPLETION</string>
-    <string name="key_onboarding_completed_value">onboarding_completion_value</string>
+  <!-- Keys/Values -->
+  <string name="key_amount_file">com.inodaf.cowpaw.AMOUNT_FILE</string>
+  <string name="key_amount_value">amount_value</string>
+  <string name="key_onboarding_completed_file">com.inodaf.cowpaw.ONBOARDING_COMPLETION</string>
+  <string name="key_onboarding_completed_value">onboarding_completion_value</string>
 
-    <!-- Transaction Matchers -->
-    <string name="matcher_approved_purchase">compra aprovada</string>
+  <!-- Transaction Matchers -->
+  <string name="matcher_approved_purchase">compra aprovada</string>
+  <string name="appwidget_text">EXAMPLE</string>
+  <string name="add_widget">Add widget</string>
 </resources>

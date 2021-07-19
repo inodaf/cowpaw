@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.inodaf.cowpaw.MainActivity
 import com.inodaf.cowpaw.R
@@ -15,13 +16,18 @@ open class Base : Service() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        val message = intent.getStringExtra("message")
-        val amount = parseMessage(message)
+        val message: String = intent.getStringExtra("bankingMessage")
+        val isPurchase: Boolean = intent.getBooleanExtra("isPurchase", false)
+        val transactionAmount: String = intent.getStringExtra("amount")
+        val updatedInvoiceAmount = parseMessage(message, isPurchase, transactionAmount)
+
+        Log.d("CowPaw.ExpenseWatcher", "Amount ${updatedInvoiceAmount.toString()}")
+        Log.d("CowPaw.ExpenseWatcher", "Purchase ${isPurchase.toString()}")
 
         setupNotification()
-        updateNotification(amount)
+        updateNotification(updatedInvoiceAmount)
 
-        setPersistedAmount(amount.toString())
+        setPersistedAmount(updatedInvoiceAmount.toString())
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -32,7 +38,7 @@ open class Base : Service() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateNotification(amount: Float?) {
-        notification.notify("${getString(R.string.current_invoice)}: $$amount")
+        notification.notify("${getString(R.string.current_invoice)}: R$ $amount")
     }
 
     private fun setPersistedAmount(amount: String?) {
@@ -48,7 +54,7 @@ open class Base : Service() {
         return persistenceLayer.getString(getString(R.string.key_amount_value), "0.0")
     }
 
-    open fun parseMessage(message: String): Float? {
+    open fun parseMessage(message: String, isPurchase: Boolean, amount: String): Float? {
         return null
     }
 
@@ -58,20 +64,12 @@ open class Base : Service() {
 }
 
 class ExpenseWatcher : Base() {
-    private fun isPurchaseTransaction(message: String): Boolean {
-        val matcher = getString(R.string.matcher_approved_purchase)
-        return message.contains(Regex(matcher, RegexOption.IGNORE_CASE))
-    }
-
-    override fun parseMessage(message: String): Float? {
+    override fun parseMessage(message: String, isPurchase: Boolean, amount: String): Float? {
         val previousAmount = getPersistedAmount()?.toFloatOrNull()
-        val amountMatchingRule = Regex("\\d*.\\d*,\\d{2}")
 
-        return if (isPurchaseTransaction(message)) {
-            val matchingAmount = amountMatchingRule.find(message)
-            val operationAmount = matchingAmount?.value?.replace(",", ".")?.toFloatOrNull()
-
-            return previousAmount?.let { operationAmount?.plus(it) }
+        return if (isPurchase) {
+            val parsedPurchaseAmount = amount?.replace(",", ".")?.toFloatOrNull()
+            return previousAmount?.let { parsedPurchaseAmount?.plus(it) }
         } else {
             previousAmount
         }
