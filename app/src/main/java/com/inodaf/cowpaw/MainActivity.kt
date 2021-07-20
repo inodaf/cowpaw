@@ -5,9 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.inodaf.cowpaw.viewmodels.InvoiceViewModel
+import androidx.activity.viewModels
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var currentInvoice: TextView;
+    private lateinit var currentInvoice: TextView
+    private val viewModel: InvoiceViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
