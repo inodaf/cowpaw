@@ -20,9 +20,12 @@ open class Base : Service() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val message: String = intent.getStringExtra("bankingMessage")
+
         val isPurchase: Boolean = intent.getBooleanExtra("isPurchase", false)
+        val isReversal: Boolean = intent.getBooleanExtra("isReversal", false)
+
         val transactionAmount: String = intent.getStringExtra("amount")
-        val updatedInvoiceAmount = "%.2f".format(parseMessage(message, isPurchase, transactionAmount))
+        val updatedInvoiceAmount = "%.2f".format(parseMessage(message, isPurchase, isReversal, transactionAmount))
 
         Log.d("CowPaw.ExpenseWatcher", "Amount ${updatedInvoiceAmount.toString()}")
         Log.d("CowPaw.ExpenseWatcher", "Purchase ${isPurchase.toString()}")
@@ -71,7 +74,7 @@ open class Base : Service() {
         sendBroadcast(intent)
     }
 
-    open fun parseMessage(message: String, isPurchase: Boolean, amount: String): Float? {
+    open fun parseMessage(message: String, isPurchase: Boolean, isReversal: Boolean, amount: String): Float? {
         return null
     }
 
@@ -81,12 +84,21 @@ open class Base : Service() {
 }
 
 class ExpenseWatcher : Base() {
-    override fun parseMessage(message: String, isPurchase: Boolean, amount: String): Float? {
+    override fun parseMessage(message: String, isPurchase: Boolean, isReversal: Boolean, amount: String): Float? {
         val previousAmount = getPersistedAmount()?.toFloatOrNull()
 
-        return if (isPurchase) {
-            val parsedPurchaseAmount = amount?.replace(",", ".")?.toFloatOrNull()
-            return previousAmount?.let { parsedPurchaseAmount?.plus(it) }
+        return if (isPurchase || isReversal) {
+            val parsedPurchaseAmount = amount.replace(",", ".").toFloat()
+
+            return previousAmount?.let {
+                if (isReversal && it >= parsedPurchaseAmount) {
+                    return it - parsedPurchaseAmount
+                } else if (isPurchase) {
+                    return it + parsedPurchaseAmount
+                }
+
+                return it
+            }
         } else {
             previousAmount
         }
