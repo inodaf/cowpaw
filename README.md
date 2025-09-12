@@ -3,6 +3,8 @@
 Keep track of your brazilian credit card bill in real time with this Expenses Watching Widget for
 Android. Your bank sends you an SMS about a new transaction, Cow Paw then reads the message
 and show your new balance in your home screen. No fear to open your bank app!
+<video src="https://github.com/user-attachments/assets/0673c71d-f639-471c-82d9-ace1d6986730" autoplay></video>
+
 
 ### Features
 
