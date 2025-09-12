@@ -7,12 +7,14 @@ import android.util.Log
 
 class SMSWatcher : IntentService(SMSWatcher::class.simpleName) {
     override fun onHandleIntent(intent: Intent?) {
-        val receivedSMSMessage = intent?.getStringExtra("RECEIVED_SMS")
-        val operationHandler = Intent(this, SMSHandler::class.java).apply {
+        if (intent == null) return
+
+        val receivedSMSMessage = intent.getStringExtra("RECEIVED_SMS").toString()
+        val smsHandler = Intent(this, SMSHandler::class.java).apply {
             putExtra("message", receivedSMSMessage)
         }
 
-        startService(operationHandler)
+        startService(smsHandler)
         Log.d("CowPaw.SMSWatcher", receivedSMSMessage)
     }
 }

@@ -8,21 +8,23 @@ import com.inodaf.cowpaw.usecases.ExpenseWatcher
 import com.inodaf.cowpaw.utils.SMSDescriptor
 
 class SMSHandler : Service() {
+    private val smsDescriptor = SMSDescriptor()
 
-    private lateinit var message: String
-    private lateinit var smsDescriptor: SMSDescriptor
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("CowPaw.SMSHandler", "Start SMS Handler Service")
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        message = intent.getStringExtra("message")
-        smsDescriptor = SMSDescriptor(message)
+        if (intent == null) return super.onStartCommand(intent, flags, startId)
 
-        if (smsDescriptor.matchBankingSMS()) {
-            Log.d("CowPaw.SMSHandler", "matchBankingSMS")
+        val message = intent.getStringExtra("message").toString()
+        smsDescriptor.message = message
+
+        if (smsDescriptor.isBankingSMS()) {
+            Log.d("CowPaw.SMSHandler", "Match banking SMS")
 
             startService(Intent(this, ExpenseWatcher::class.java).apply {
                 putExtra("bankingMessage", message)
-                putExtra("isPurchase", smsDescriptor.matchPurchaseSMS())
-                putExtra("isReversal", smsDescriptor.matchReversalSMS())
+                putExtra("isPurchase", smsDescriptor.isPurchaseSMS())
+                putExtra("isReversal", smsDescriptor.isReversalSMS())
                 putExtra("amount", smsDescriptor.getAmount())
             })
         }
