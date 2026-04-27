@@ -6,32 +6,22 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.inodaf.cowpaw.viewmodels.InvoiceViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val viewModel: InvoiceViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         if (!isOnboarded()) return startOnboarding()
 
         setContentView(R.layout.activity_main)
 
-        val amount = String.format("%.2f", getCurrentAmount())
-        val currentInvoiceView = findViewById<TextView>(R.id.current_invoice)
-        currentInvoiceView.text = "R$ $amount"
-    }
-
-    private fun getCurrentAmount(): Float {
-        val preferences = getSharedPreferences(
-            getString(R.string.key_amount_file),
-            MODE_PRIVATE
-        )
-
-        return preferences.getFloat(
-            getString(R.string.key_amount_value),
-            0.0f,
-        )
+        viewModel.invoice.observe(this) {
+            val amount = String.format("R$ %.2f", it.total.value)
+            findViewById<TextView>(R.id.current_invoice).text =  amount
+        }
     }
 
     private fun isOnboarded(): Boolean {

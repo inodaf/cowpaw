@@ -11,6 +11,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 
+// TODO:
+// Shortcut for opening the widgets drawer
+// Invoices due date setup
+
+
 class OnboardingActivity : AppCompatActivity() {
     private val requiredPermissions = arrayOf(
         Manifest.permission.RECEIVE_SMS,
