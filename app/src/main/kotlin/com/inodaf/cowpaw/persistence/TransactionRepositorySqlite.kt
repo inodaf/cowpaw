@@ -6,8 +6,8 @@ import com.inodaf.cowpaw.domain.TransactionRepository
 import java.util.UUID
 import javax.inject.Inject
 
-class TransactionRepositorySqlite(
-    @Inject private val sqlite: SQLiteOpenHelper
+class TransactionRepositorySqlite @Inject constructor(
+    val sqlite: SQLiteOpenHelper
 ) : TransactionRepository {
 
     override fun save(it: Transaction): Result<Unit> {

@@ -2,6 +2,7 @@ package com.inodaf.cowpaw.di
 
 import android.content.Context
 import android.database.sqlite.SQLiteOpenHelper
+import com.inodaf.cowpaw.domain.InvoiceRepository
 import com.inodaf.cowpaw.domain.TransactionRepository
 import com.inodaf.cowpaw.persistence.InvoiceRepositorySqlite
 import com.inodaf.cowpaw.persistence.TransactionRepositorySqlite
@@ -27,13 +28,13 @@ object Persistence {
     @Singleton
     fun transactionRepository(
         sqlite: SQLiteOpenHelper
-    ) = TransactionRepositorySqlite(sqlite)
+    ): TransactionRepository = TransactionRepositorySqlite(sqlite)
 
     @Provides
     @Singleton
     fun invoiceRepository(
         sqlite: SQLiteOpenHelper,
         transactionRepo: TransactionRepository
-    ) = InvoiceRepositorySqlite(sqlite, transactionRepo)
+    ): InvoiceRepository = InvoiceRepositorySqlite(sqlite, transactionRepo)
 }
 

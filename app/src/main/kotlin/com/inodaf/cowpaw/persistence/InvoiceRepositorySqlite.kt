@@ -8,24 +8,10 @@ import com.inodaf.cowpaw.domain.TransactionRepository
 import java.util.UUID
 import javax.inject.Inject
 
-class InvoiceRepositorySqlite(
-    @Inject private val sqlite: SQLiteOpenHelper,
-    @Inject private val transactionRepo: TransactionRepository,
+class InvoiceRepositorySqlite @Inject constructor(
+    val sqlite: SQLiteOpenHelper,
+    val transactionRepo: TransactionRepository,
 ) : InvoiceRepository {
-
-    override fun getOpen(): Float {
-        val db = sqlite.readableDatabase
-
-        val cursor = db.query("balance", arrayOf("amount"), null, null, null, null, null, null)
-        val amount = if (cursor.moveToFirst()) {
-            cursor.getFloat(cursor.getColumnIndexOrThrow("amount"))
-        } else 0.0f
-
-        cursor.close()
-        db.close()
-
-        return amount
-    }
 
     override fun getForCurrentMonth(): Result<Invoice> {
         val db = sqlite.readableDatabase

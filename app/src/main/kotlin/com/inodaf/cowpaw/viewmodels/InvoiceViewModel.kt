@@ -13,8 +13,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class InvoiceViewModel @Inject constructor(
-    private val getCurrentInvoice: GetCurrentInvoice,
-    private val transactionAddedChannel: TransactionAddedChannel
+    val getCurrentInvoice: GetCurrentInvoice,
+    val transactionAddedChannel: TransactionAddedChannel
 ) : ViewModel() {
     var invoice = MutableLiveData<GetCurrentInvoice.Output>(); private set;
 

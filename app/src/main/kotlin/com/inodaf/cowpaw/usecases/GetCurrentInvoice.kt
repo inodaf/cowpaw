@@ -6,8 +6,8 @@ import com.inodaf.cowpaw.domain.Transaction
 import java.util.Date
 import javax.inject.Inject
 
-class GetCurrentInvoice(
-    @Inject private val repository: InvoiceRepository
+class GetCurrentInvoice @Inject constructor(
+    val repository: InvoiceRepository
 ) {
 
     operator fun invoke(): Result<Output> {
