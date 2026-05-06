@@ -19,6 +19,10 @@ and show your new balance in your home screen. No fear to open your bank app!
 
 - Itaú
 
+```txt
+Compra aprovada de R$ 21,55 em 21/11 as 19h30 em MERCADO.
+```
+
 ## Getting Started
 
 > [!IMPORTANT]

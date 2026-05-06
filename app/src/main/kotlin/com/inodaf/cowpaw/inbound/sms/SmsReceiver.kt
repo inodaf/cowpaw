@@ -7,8 +7,10 @@ import android.provider.Telephony
 import android.util.Log
 import com.inodaf.cowpaw.domain.TransactionNotificationParser
 import com.inodaf.cowpaw.usecases.RecordTransaction
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class SmsReceiver : BroadcastReceiver() {
 
     @Inject lateinit var recordTransaction: RecordTransaction
@@ -22,7 +24,7 @@ class SmsReceiver : BroadcastReceiver() {
             parsers.forEach {
                 it.parse(smsMessage.messageBody)
                     .onFailure { err -> mapFailure(err) }
-                    .map { recordTransaction }
+                    .map { t -> recordTransaction(t) }
             }
         }
     }

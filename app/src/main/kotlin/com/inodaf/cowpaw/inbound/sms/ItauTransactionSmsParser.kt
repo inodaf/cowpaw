@@ -22,11 +22,9 @@ class ItauTransactionSmsParser : TransactionNotificationParser {
     }
 
     private fun isTransaction(content: String): Boolean {
-        return listOf(
-            DATE_PATTERN,
-            TIME_PATTERN,
-            AMOUNT_PATTERN
-        ).filter { content.contains(it) }.size == 3
+        return listOf(DATE_PATTERN, TIME_PATTERN, AMOUNT_PATTERN)
+            .filter { content.contains(it) }
+            .size == 3
     }
 
     private fun isPurchase(content: String): Boolean {
@@ -48,7 +46,11 @@ class ItauTransactionSmsParser : TransactionNotificationParser {
     }
 
     private fun getAmount(content: String): Long? {
-        return AMOUNT_PATTERN.find(content)?.value?.toLongOrNull() ?: "".toLongOrNull()
+        return AMOUNT_PATTERN.find(content)?.value
+            ?.replace(",", "")
+            ?.replace(".", "")
+            ?.trim()
+            ?.toLongOrNull()
     }
 
     companion object {
