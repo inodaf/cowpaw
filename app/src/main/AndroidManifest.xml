@@ -34,7 +34,7 @@
             android:noHistory="true" />
 
         <service
-            android:name=".usecases.ExpenseWatcher"
+            android:name=".outbound.WidgetsUpdater"
             android:enabled="true"
             android:exported="false" />
 
@@ -46,16 +46,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <service
-            android:name=".services.SMSHandler"
-            android:enabled="true"
-            android:exported="false" />
-        <service
-            android:name=".services.SMSWatcher"
-            android:enabled="true"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <receiver
             android:name=".inbound.sms.SmsReceiver"

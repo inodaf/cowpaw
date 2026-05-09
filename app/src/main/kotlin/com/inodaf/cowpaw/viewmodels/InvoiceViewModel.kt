@@ -9,20 +9,22 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Make it real-time by using MutableSharedFlow instead of Result and LiveData
-
 @HiltViewModel
 class InvoiceViewModel @Inject constructor(
     val getCurrentInvoice: GetCurrentInvoice,
     val transactionAddedChannel: TransactionAddedChannel
 ) : ViewModel() {
-    var invoice = MutableLiveData<GetCurrentInvoice.Output>(); private set;
+    var invoice = MutableLiveData<GetCurrentInvoice.Output>(); private set
 
     init {
+        refresh()
+
         viewModelScope.launch {
-            transactionAddedChannel.flow.collect {
-                getCurrentInvoice().map { invoice.value = it }
-            }
+            transactionAddedChannel.flow.collect { refresh() }
         }
+    }
+
+    private fun refresh() {
+        getCurrentInvoice().map { invoice.value = it }
     }
 }

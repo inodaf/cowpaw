@@ -1,9 +1,11 @@
 package com.inodaf.cowpaw.di
 
 import com.inodaf.cowpaw.domain.InvoiceRepository
+import com.inodaf.cowpaw.domain.Notificator
 import com.inodaf.cowpaw.domain.TransactionRepository
 import com.inodaf.cowpaw.inbound.TransactionAddedChannel
 import com.inodaf.cowpaw.usecases.GetCurrentInvoice
+import com.inodaf.cowpaw.usecases.Onboard
 import com.inodaf.cowpaw.usecases.RecordTransaction
 import dagger.Module
 import dagger.Provides
@@ -27,9 +29,17 @@ object UseCases {
         transactionRepository: TransactionRepository,
         invoiceRepository: InvoiceRepository,
         transactionAddedChannel: TransactionAddedChannel,
+        notificator: Notificator,
     ) = RecordTransaction(
         transactionRepository,
         invoiceRepository,
-        transactionAddedChannel
+        transactionAddedChannel,
+        notificator
     )
+
+    @Provides
+    @Singleton
+    fun onboard(
+        invoiceRepository: InvoiceRepository,
+    ) = Onboard(invoiceRepository)
 }

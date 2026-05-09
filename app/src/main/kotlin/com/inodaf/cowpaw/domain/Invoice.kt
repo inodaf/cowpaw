@@ -21,11 +21,11 @@ class Invoice private constructor(
     }
 
     /**
-     * Mark the Invoice as [Status.Paid]. If already paid,
-     * return a [PayError].
+     * Mark the Invoice as [Status.Paid]. Will return
+     * a [MarkAsPaidError] for failures.
      */
-    fun pay(): Result<Unit> {
-        if (status == Status.Paid) return Result.failure(PayError.AlreadyPaid())
+    fun markAsPaid(): Result<Unit> {
+        if (status == Status.Paid) return Result.failure(MarkAsPaidError.AlreadyPaid())
 
         status = Status.Paid
         paidAt = Date()
@@ -70,7 +70,7 @@ class Invoice private constructor(
         )
     }
 
-    sealed class PayError : Throwable() {
-        class AlreadyPaid : PayError()
+    sealed class MarkAsPaidError : Throwable() {
+        class AlreadyPaid : MarkAsPaidError()
     }
 }

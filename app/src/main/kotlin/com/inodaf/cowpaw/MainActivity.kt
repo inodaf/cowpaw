@@ -19,8 +19,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         viewModel.invoice.observe(this) {
-            val amount = String.format("R$ %.2f", it.total.value)
-            findViewById<TextView>(R.id.current_invoice).text =  amount
+            findViewById<TextView>(R.id.current_invoice).text = it.total.format()
         }
     }
 

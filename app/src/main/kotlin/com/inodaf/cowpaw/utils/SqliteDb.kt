@@ -28,7 +28,6 @@ class SqliteDb(context: Context) : SQLiteOpenHelper(context, "cowpaw.db", null, 
             );
         """.trimIndent()
 
-
         db.execSQL(createInvoiceTable)
         db.execSQL(createTransactionTable)
     }

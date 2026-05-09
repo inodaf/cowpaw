@@ -14,10 +14,9 @@ import javax.inject.Inject
 class SmsReceiver : BroadcastReceiver() {
 
     @Inject lateinit var recordTransaction: RecordTransaction
-    var parsers: List<TransactionNotificationParser> = listOf(ItauTransactionSmsParser())
+    val parsers = listOf(ItauTransactionSmsParser())
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("CowPaw.SmsReceiver", "Received SMS")
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
         for (smsMessage in Telephony.Sms.Intents.getMessagesFromIntent(intent)) {

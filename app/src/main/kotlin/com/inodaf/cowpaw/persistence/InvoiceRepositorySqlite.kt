@@ -1,6 +1,7 @@
 package com.inodaf.cowpaw.persistence
 
 import android.content.ContentValues
+import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.inodaf.cowpaw.domain.Invoice
 import com.inodaf.cowpaw.domain.InvoiceRepository
@@ -12,6 +13,25 @@ class InvoiceRepositorySqlite @Inject constructor(
     val sqlite: SQLiteOpenHelper,
     val transactionRepo: TransactionRepository,
 ) : InvoiceRepository {
+
+    override fun save(it: Invoice): Result<Unit> {
+        val db = sqlite.writableDatabase
+        val values = ContentValues().apply {
+            put("id", it.id.toString())
+            put("amount", it.total().value)
+            put("status", it.status.name)
+            put("due_at", it.dueAt.time)
+            put("paid_at", it.paidAt?.time)
+            put("created_at", it.createdAt.time)
+        }
+
+        return runCatching {
+            db.insertWithOnConflict("invoices", null, values, SQLiteDatabase.CONFLICT_REPLACE)
+        }
+            .map { }
+            .onFailure { err -> return Result.failure(err) }
+            .also { db.close() }
+    }
 
     override fun getForCurrentMonth(): Result<Invoice> {
         val db = sqlite.readableDatabase
