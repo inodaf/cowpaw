@@ -10,9 +10,21 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import com.inodaf.cowpaw.usecases.Onboard
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+// TODO:
+// Shortcut for opening the widgets drawer
+// Invoices due date setup
+// Setup persistent notification with invoice due date and amount
+
+@AndroidEntryPoint
 class OnboardingActivity : AppCompatActivity() {
+    @Inject lateinit var onboard: Onboard
+
     private val requiredPermissions = arrayOf(
+        Manifest.permission.POST_NOTIFICATIONS,
         Manifest.permission.RECEIVE_SMS,
         Manifest.permission.READ_SMS
     )
@@ -24,7 +36,13 @@ class OnboardingActivity : AppCompatActivity() {
         val startButton = findViewById<Button>(R.id.start_button)
 
         startButton.setOnClickListener {
-            Log.d("CowPaw.Onboarding", "Start Button Clicked")
+            onboard(Onboard.Input(
+                invoiceDueDate = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000,
+                persistentNotification = false,
+            )).onFailure {
+                Log.e("CowPaw.Onboarding", "Failed to onboard user", it)
+            }
+
             requestPermissions()
         }
     }
