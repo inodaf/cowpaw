@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.inodaf.cowpaw.inbound.TransactionAddedChannel
 import com.inodaf.cowpaw.usecases.GetCurrentInvoice
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,14 +18,13 @@ class InvoiceViewModel @Inject constructor(
     var invoice = MutableLiveData<GetCurrentInvoice.Output>(); private set
 
     init {
-        refresh()
-
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            refresh()
             transactionAddedChannel.flow.collect { refresh() }
         }
     }
 
     private fun refresh() {
-        getCurrentInvoice().map { invoice.value = it }
+        getCurrentInvoice().map { invoice.postValue(it) }
     }
 }

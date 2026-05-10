@@ -3,7 +3,7 @@ package com.inodaf.cowpaw.inbound
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 class TransactionAddedChannel {
-    val flow = MutableSharedFlow<Unit>();
+    val flow = MutableSharedFlow<Unit>(extraBufferCapacity = 1);
 
-    suspend fun emit() = flow.emit(Unit)
+    fun emit() = flow.tryEmit(Unit)
 }

@@ -1,4 +1,4 @@
-package com.inodaf.cowpaw.utils
+package com.inodaf.cowpaw.config
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -24,7 +24,7 @@ class SqliteDb(context: Context) : SQLiteOpenHelper(context, "cowpaw.db", null, 
                 amount INTEGER NOT NULL,
                 created_at TEXT DEFAULT (datetime('now')),
                 invoice_id TEXT NOT NULL,
-                FOREIGN KEY (invoice_id) REFERENCES invoice(id)
+                FOREIGN KEY (invoice_id) REFERENCES invoices(id)
             );
         """.trimIndent()
 

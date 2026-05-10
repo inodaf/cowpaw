@@ -29,7 +29,7 @@ class InvoiceRepositorySqlite @Inject constructor(
             db.insertWithOnConflict("invoices", null, values, SQLiteDatabase.CONFLICT_REPLACE)
         }
             .map { }
-            .onFailure { err -> return Result.failure(err) }
+            .onFailure { err -> Result.failure<Unit>(err) }
             .also { db.close() }
     }
 
@@ -67,13 +67,5 @@ class InvoiceRepositorySqlite @Inject constructor(
         }
             .onFailure { err -> return Result.failure(err) }
             .also { db.close() }
-    }
-
-    override fun setCurrent(amount: Float) {
-        val db = sqlite.writableDatabase
-        val values = ContentValues().apply { put("amount", amount) }
-
-        db.insert("balance", null, values)
-        db.close()
     }
 }

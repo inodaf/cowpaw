@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.util.Log
-import com.inodaf.cowpaw.domain.TransactionNotificationParser
+import com.inodaf.cowpaw.domain.TransactionNotificationParser.ParseError
 import com.inodaf.cowpaw.usecases.RecordTransaction
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -29,10 +29,9 @@ class SmsReceiver : BroadcastReceiver() {
     }
 
     private fun mapFailure(error: Throwable) {
-        when (error as TransactionNotificationParser.ParseError) {
-            is TransactionNotificationParser.ParseError.NotATransaction -> {
-                Log.w("CowPaw.SmsReceiver", "Unable to parse SMS content. Not a transaction.")
-            }
+        when (error) {
+            is ParseError -> Log.w("SmsReceiver", "Unable to parse SMS content. Not a transaction.")
+            else -> Log.e("SmsReceiver", "Error parsing SMS: ${error.message}")
         }
     }
 }

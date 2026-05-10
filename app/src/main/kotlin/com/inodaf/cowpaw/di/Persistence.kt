@@ -6,7 +6,7 @@ import com.inodaf.cowpaw.domain.InvoiceRepository
 import com.inodaf.cowpaw.domain.TransactionRepository
 import com.inodaf.cowpaw.persistence.InvoiceRepositorySqlite
 import com.inodaf.cowpaw.persistence.TransactionRepositorySqlite
-import com.inodaf.cowpaw.utils.SqliteDb
+import com.inodaf.cowpaw.config.SqliteDb
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -30,7 +30,7 @@ class InvoiceTotalNotificator @Inject constructor(
         )
     }
 
-    override fun notify(title: String) {
+    override fun send() {
         manager.cancel(1)
         if (!manager.activeNotifications.isEmpty()) return
 

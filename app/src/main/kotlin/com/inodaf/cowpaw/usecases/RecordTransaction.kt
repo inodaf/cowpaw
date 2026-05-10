@@ -5,7 +5,6 @@ import com.inodaf.cowpaw.domain.Notificator
 import com.inodaf.cowpaw.domain.Transaction
 import com.inodaf.cowpaw.domain.TransactionRepository
 import com.inodaf.cowpaw.inbound.TransactionAddedChannel
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 class RecordTransaction @Inject constructor(
@@ -22,8 +21,8 @@ class RecordTransaction @Inject constructor(
         transaction.associateWithInvoice(invoice.id)
 
         return repository.save(transaction).onSuccess {
-            notificator.notify("")
-            runBlocking { transactionAddedChannel.emit() }
+            notificator.send()
+            transactionAddedChannel.emit()
         }
     }
 }

@@ -30,8 +30,8 @@ class TransactionRepositorySqlite @Inject constructor(
             stmt.executeInsert()
             stmt.close()
         }
-            .onSuccess { return Result.success(Unit) }
-            .onFailure { err -> return Result.failure(err) }
+            .onSuccess { Result.success(Unit) }
+            .onFailure { err -> Result.failure<Unit>(err) }
             .also { db.close() }
     }
 
@@ -60,8 +60,8 @@ class TransactionRepositorySqlite @Inject constructor(
             cursor.close()
             transactions
         }
-            .onSuccess { return Result.success(it) }
-            .onFailure { err -> return Result.failure(err) }
+            .onSuccess { Result.success(it) }
+            .onFailure { err -> Result.failure<Unit>(err) }
             .also { db.close() }
     }
 }
