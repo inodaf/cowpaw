@@ -1,4 +1,4 @@
-package com.inodaf.cowpaw.di
+package com.inodaf.cowpaw.config.di
 
 import com.inodaf.cowpaw.domain.InvoiceRepository
 import com.inodaf.cowpaw.domain.Notificator

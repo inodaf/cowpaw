@@ -1,4 +1,4 @@
-package com.inodaf.cowpaw.persistence
+package com.inodaf.cowpaw.outbound
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
@@ -53,7 +53,7 @@ class InvoiceRepositorySqlite @Inject constructor(
                 .ofInvoice(UUID.fromString(cursor.getString(0)))
                 .getOrElse { emptyList() }
 
-            val invoice = Invoice.from(
+            val invoice = Invoice.Companion.from(
                 id = cursor.getString(0),
                 status = cursor.getString(1),
                 dueAt = cursor.getLong(2),

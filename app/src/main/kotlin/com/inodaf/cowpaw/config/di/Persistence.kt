@@ -1,11 +1,11 @@
-package com.inodaf.cowpaw.di
+package com.inodaf.cowpaw.config.di
 
 import android.content.Context
 import android.database.sqlite.SQLiteOpenHelper
 import com.inodaf.cowpaw.domain.InvoiceRepository
 import com.inodaf.cowpaw.domain.TransactionRepository
-import com.inodaf.cowpaw.persistence.InvoiceRepositorySqlite
-import com.inodaf.cowpaw.persistence.TransactionRepositorySqlite
+import com.inodaf.cowpaw.outbound.InvoiceRepositorySqlite
+import com.inodaf.cowpaw.outbound.TransactionRepositorySqlite
 import com.inodaf.cowpaw.config.SqliteDb
 import dagger.Module
 import dagger.Provides

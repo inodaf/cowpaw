@@ -1,4 +1,4 @@
-package com.inodaf.cowpaw.persistence
+package com.inodaf.cowpaw.outbound
 
 import android.database.sqlite.SQLiteOpenHelper
 import com.inodaf.cowpaw.domain.Transaction
@@ -48,7 +48,7 @@ class TransactionRepositorySqlite @Inject constructor(
             val transactions = mutableListOf<Transaction>()
 
             while (cursor.moveToNext()) {
-                val transaction = Transaction.from(
+                val transaction = Transaction.Companion.from(
                     id = cursor.getString(0),
                     type = cursor.getString(1),
                     amount = cursor.getLong(2),

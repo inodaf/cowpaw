@@ -1,4 +1,4 @@
-package com.inodaf.cowpaw.di
+package com.inodaf.cowpaw.config.di
 
 import android.content.Context
 import android.os.Build
