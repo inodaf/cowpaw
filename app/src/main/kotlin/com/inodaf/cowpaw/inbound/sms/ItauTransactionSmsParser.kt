@@ -1,10 +1,9 @@
 package com.inodaf.cowpaw.inbound.sms
 
 import com.inodaf.cowpaw.domain.Transaction
-import com.inodaf.cowpaw.domain.TransactionNotificationParser
-import com.inodaf.cowpaw.domain.TransactionNotificationParser.ParseError
+import com.inodaf.cowpaw.inbound.sms.TransactionSmsParser.ParseError
 
-class ItauTransactionSmsParser : TransactionNotificationParser {
+class ItauTransactionSmsParser : TransactionSmsParser {
 
     override fun parse(content: String): Result<Transaction> {
         if (content.isEmpty() || !isTransaction(content)) {

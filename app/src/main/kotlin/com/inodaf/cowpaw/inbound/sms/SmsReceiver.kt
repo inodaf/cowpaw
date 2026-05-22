@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.util.Log
-import com.inodaf.cowpaw.domain.TransactionNotificationParser.ParseError
+import com.inodaf.cowpaw.inbound.sms.TransactionSmsParser.ParseError
 import com.inodaf.cowpaw.usecases.RecordTransaction
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
