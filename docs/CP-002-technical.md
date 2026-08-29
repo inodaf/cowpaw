@@ -3,8 +3,9 @@
 ## Summary
 
 Replace the hard-coded onboarding due date with a required recurring due-day
-selection. Store the schedule in SQLite and use it to find or create the active
-invoice from both the main screen and SMS transaction flow.
+selection. Create a card with that due day, associate invoices with the card,
+and use its configuration to find or create the active invoice from both the
+main screen and SMS transaction flow.
 
 ## Current Behavior
 
@@ -23,23 +24,46 @@ invoice from both the main screen and SMS transaction flow.
 
 ### Due-Day Semantics
 
-- Store an integer from 1 through 31.
+- Store an integer from 1 through 31 on the card.
 - Treat local midnight at the start of the due date as the invoice boundary.
-- The active invoice must have `due_at > now`.
+- A card's active invoice must have `due_at > now`.
 - If this month's selected day is equal to or before today, calculate the first
   due date in the next month.
 - Clamp days that do not exist in a month to that month's final day.
-- Preserve the configured day when clamping. For example, a schedule for day 31
+- Preserve the configured day when clamping. For example, a card due on day 31
   produces February 28 and then March 31.
+
+### Card Model
+
+Introduce a `Card` entity with a unique ID and due day. Onboarding creates one
+card under the hood and associates the first invoice with it. Main screen and
+SMS flows use that only card for now, while active-invoice operations receive a
+card ID explicitly so future multi-card entry points do not depend on a global
+invoice.
+
+Managing multiple cards and identifying which card produced an SMS transaction
+remain out of scope.
 
 ### Persistence
 
-Add a singleton billing settings table alongside invoice data:
+Add a cards table and associate every invoice with a card:
 
 ```sql
-CREATE TABLE billing_settings (
-    id INTEGER PRIMARY KEY CHECK (id = 1),
+CREATE TABLE cards (
+    id TEXT PRIMARY KEY,
     due_day INTEGER NOT NULL CHECK (due_day BETWEEN 1 AND 31)
+);
+
+CREATE TABLE invoices (
+    id TEXT PRIMARY KEY,
+    amount INTEGER NOT NULL,
+    status TEXT CHECK(status IN ('Open', 'Paid')) NOT NULL,
+    due_at INTEGER NOT NULL,
+    paid_at INTEGER,
+    created_at INTEGER NOT NULL,
+    card_id TEXT NOT NULL,
+    FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE,
+    UNIQUE (card_id, due_at)
 );
 ```
 
@@ -49,14 +73,20 @@ at the same time so an upgraded installation returns to onboarding before it
 tries to load an invoice.
 
 Change persisted timestamp columns to `INTEGER`, because repositories write and
-read epoch milliseconds. Add a uniqueness constraint for invoice due timestamps
+read epoch milliseconds. Scope invoice lookup and due-date uniqueness by card
 so retries and concurrent entry points cannot create duplicate cycle invoices.
+Enable SQLite foreign-key enforcement when configuring the database.
+
+Create the onboarding card and first invoice in one database transaction. If
+the operation is retried, it must return or reuse the already-created card and
+invoice rather than create another pair.
 
 ### Persistence Alternatives
 
-SharedPreferences was considered for the recurring day. It avoids a database
-migration, but splits billing rules and invoices across stores, prevents atomic
-database operations, and weakens repository-level tests.
+Singleton billing settings in SQLite or SharedPreferences were considered for
+the recurring day. Both make the due day global and would need replacement when
+Cow Paw supports multiple cards. A card entity keeps the due day with the object
+that owns the invoice cycle.
 
 Deriving the recurring day from the previous invoice was also considered. It
 cannot preserve an intended day 31 after clamping the February invoice to day
@@ -69,17 +99,17 @@ sequenceDiagram
     actor User
     participant UI as OnboardingActivity
     participant Onboard
-    participant Schedule as BillingScheduleRepository
+    participant Card as CardRepository
     participant Invoice as InvoiceRepository
     participant DB as SQLite
 
     User->>UI: Select due day 1-31
     User->>UI: Tap Comecar
     UI->>Onboard: Configure due day
-    Onboard->>Schedule: Save recurring day
-    Schedule->>DB: Store billing setting
-    Onboard->>Invoice: Get or create active invoice
-    Invoice->>DB: Insert next due-date invoice
+    Onboard->>Card: Save card with due day
+    Card->>DB: Insert card
+    Onboard->>Invoice: Create invoice for card ID
+    Invoice->>DB: Insert associated invoice
     UI->>User: Request missing permissions
     UI->>UI: Complete onboarding
 ```
@@ -87,18 +117,19 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Entry as Main screen / SMS
+    participant Card as CardRepository
     participant UseCase as GetOrCreateCurrentInvoice
-    participant Schedule as BillingScheduleRepository
     participant Invoice as InvoiceRepository
 
-    Entry->>UseCase: Request active invoice
-    UseCase->>Invoice: Find invoice with due_at greater than now
+    Entry->>Card: Load onboarded card
+    Card-->>Entry: Card ID and due day
+    Entry->>UseCase: Request active invoice for card
+    UseCase->>Invoice: Find card invoice with due_at greater than now
     alt Active invoice exists
         Invoice-->>UseCase: Existing invoice
     else Due boundary passed
-        UseCase->>Schedule: Read recurring day
-        UseCase->>UseCase: Calculate next occurrence
-        UseCase->>Invoice: Create invoice
+        UseCase->>UseCase: Calculate next occurrence from card due day
+        UseCase->>Invoice: Create invoice for card ID
     end
     UseCase-->>Entry: Active invoice
 ```
@@ -113,21 +144,24 @@ sequenceDiagram
    `strings.xml`.
 4. Keep **Comecar** disabled until the user explicitly selects a day and restore
    that selection after activity recreation.
-5. Add a billing schedule domain type that validates the day and calculates the
-   next local due-date boundary, including short months and year rollover.
-6. Add `BillingScheduleRepository` and its SQLite implementation.
-7. Update `SqliteDb` with the billing settings table, integer timestamp columns,
-   due-date uniqueness, database version, and approved reset behavior.
-8. Replace `InvoiceRepository.getForCurrentMonth()` with active-invoice lookup
-   ordered by due date.
-9. Add an idempotent get-or-create-active-invoice use case shared by
-   `GetCurrentInvoice`, `RecordTransaction`, and onboarding.
-10. Update `Onboard` to persist the recurring day and create the first invoice.
-11. Remove the unused `persistentNotification` onboarding input.
-12. Mark onboarding complete only after persistence succeeds.
-13. Request only missing permissions and continue immediately when all required
+5. Add a `Card` domain entity with an ID, validated due day, and next local
+   due-date calculation, including short months and year rollover.
+6. Add `CardRepository` and its SQLite implementation.
+7. Add `cardId` to `Invoice` and require it when creating or hydrating invoices.
+8. Update `SqliteDb` with the cards table, invoice foreign key, integer timestamp
+   columns, card-scoped due-date uniqueness, database version, and approved
+   reset behavior. Enable SQLite foreign-key enforcement.
+9. Replace `InvoiceRepository.getForCurrentMonth()` with card-scoped
+   active-invoice lookup ordered by due date.
+10. Add an idempotent get-or-create-active-invoice use case that accepts a card
+    and is shared by `GetCurrentInvoice`, `RecordTransaction`, and onboarding.
+11. Update `Onboard` to create the card and its first associated invoice as one
+    idempotent database operation.
+12. Remove the unused `persistentNotification` onboarding input.
+13. Mark onboarding complete only after card and invoice persistence succeed.
+14. Request only missing permissions and continue immediately when all required
     permissions are already granted.
-14. Preserve SQL `NULL` when hydrating `paid_at` while updating invoice queries.
+15. Preserve SQL `NULL` when hydrating `paid_at` while updating invoice queries.
 
 ## Main Entry Points
 
@@ -136,7 +170,10 @@ sequenceDiagram
 - `app/src/main/kotlin/com/inodaf/cowpaw/usecases/Onboard.kt`
 - `app/src/main/kotlin/com/inodaf/cowpaw/usecases/GetCurrentInvoice.kt`
 - `app/src/main/kotlin/com/inodaf/cowpaw/usecases/RecordTransaction.kt`
+- `app/src/main/kotlin/com/inodaf/cowpaw/domain/Card.kt`
+- `app/src/main/kotlin/com/inodaf/cowpaw/domain/CardRepository.kt`
 - `app/src/main/kotlin/com/inodaf/cowpaw/domain/InvoiceRepository.kt`
+- `app/src/main/kotlin/com/inodaf/cowpaw/outbound/CardRepositorySqlite.kt`
 - `app/src/main/kotlin/com/inodaf/cowpaw/outbound/InvoiceRepositorySqlite.kt`
 - `app/src/main/kotlin/com/inodaf/cowpaw/config/SqliteDb.kt`
 - `app/src/main/kotlin/com/inodaf/cowpaw/config/di/Persistence.kt`
@@ -153,15 +190,20 @@ sequenceDiagram
 - Clamp days 29 through 31 in leap and non-leap February.
 - Preserve the configured day after a clamped month.
 - Handle December-to-January rollover and local time-zone boundaries.
-- Reuse an existing active invoice.
-- Create one invoice after the due boundary.
+- Create a card with the selected due day during onboarding.
+- Reuse the card and invoice when onboarding is retried.
+- Associate every created invoice with its card ID.
+- Reuse an existing active invoice for the requested card.
+- Create one card-scoped invoice after the due boundary.
+- Keep invoices from different cards isolated in repository queries.
 - Return a persistence failure without completing onboarding.
 - Associate a transaction with the newly active invoice.
 
 ### Instrumentation Tests
 
-- Persist and retrieve billing settings from SQLite.
-- Prevent duplicate invoices for the same due timestamp.
+- Persist and retrieve cards from SQLite.
+- Enforce the invoice-to-card foreign key.
+- Prevent duplicate invoices for the same card and due timestamp.
 - Require an explicit onboarding selection.
 - Restore the selected day after activity recreation.
 - Handle none, some, and all required permissions already being granted.
