@@ -25,6 +25,8 @@ main screen and SMS transaction flow.
 ### Due-Day Semantics
 
 - Store an integer from 1 through 31 on the card.
+- Store the concrete due timestamp on each invoice. The card's `due_day` is the
+  recurring rule, while an invoice's `due_at` identifies one monthly occurrence.
 - Treat local midnight at the start of the due date as the invoice boundary.
 - A card's active invoice must have `due_at > now`.
 - If this month's selected day is equal to or before today, calculate the first
@@ -66,6 +68,11 @@ CREATE TABLE invoices (
     UNIQUE (card_id, due_at)
 );
 ```
+
+`cards.due_day` cannot replace `invoices.due_at`: the day alone does not identify
+the invoice's month or year, and it does not record a clamped date such as
+February 28 for a card configured with day 31. Active-invoice queries and invoice
+history therefore use the concrete `due_at` value.
 
 Increment the database version and recreate local tables during upgrade. This
 is an approved destructive reset. Version the onboarding completion preference
